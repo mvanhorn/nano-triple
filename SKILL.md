@@ -1,110 +1,84 @@
 ---
-name: image-picker
-description: Generate 3 Nano Banana Pro prompt variations and let user pick their favorite before generating.
+name: nano-triple
+description: Generate 3 images with Nano Banana Pro using the same prompt. Pick the best, or give feedback on any option to get 3 refined versions.
 triggers:
-  - image picker
-  - pick image
-  - image options
-  - 3 options
-  - three options
+  - make me an image
+  - generate an image
+  - create an image
 metadata:
   clawdbot:
     emoji: "🎨"
 ---
 
-# Image Picker: 3 Options for Nano Banana Pro
+# Nano Triple: 3 Images, Same Prompt, You Pick
 
-When user wants to generate an image, create THREE distinct prompt variations and let them choose.
+When user wants an image, generate 3 versions and let them pick or refine.
 
 ## Flow
 
-### Step 1: User Describes What They Want
+### Step 1: User Gives Their Prompt
 
-User says something like: "generate an image of a sunset over mountains"
+User says: "make me an image of a sunset over mountains"
 
-### Step 2: Generate 3 Prompt Variations
+### Step 2: Generate 3 Images with THE SAME PROMPT
 
-Create THREE distinctly different prompts based on their request. Each should take a different creative direction:
+Use the user's EXACT prompt for all 3. Don't modify it, don't get creative. The model's inherent randomness will produce 3 different results.
 
-1. **Option A** - Realistic/photographic approach
-2. **Option B** - Artistic/stylized approach  
-3. **Option C** - Creative/unexpected interpretation
-
-### Step 3: Present Options with Inline Buttons
-
-Use Telegram inline buttons so user can tap to choose:
-
-```
-🎨 Here are 3 prompt options for your image:
-
-**A) Photorealistic**
-[Full prompt text here - 2-3 sentences max]
-
-**B) Artistic** 
-[Full prompt text here - 2-3 sentences max]
-
-**C) Creative**
-[Full prompt text here - 2-3 sentences max]
-
-Tap to generate:
-```
-
-Send with buttons:
-```json
-{
-  "buttons": [[
-    {"text": "🅰️ Photorealistic", "callback_data": "imgpick_a"},
-    {"text": "🅱️ Artistic", "callback_data": "imgpick_b"},
-    {"text": "🅲️ Creative", "callback_data": "imgpick_c"}
-  ]]
-}
-```
-
-### Step 4: When User Picks (callback received)
-
-When you receive `imgpick_a`, `imgpick_b`, or `imgpick_c`:
-
-1. Recall which prompt that was (from your previous message)
-2. Generate the image using nano-banana-pro:
+Run all 3 in parallel:
 
 ```bash
+# Same prompt, 3 times
 uv run ~/.npm-global/lib/node_modules/clawdbot/skills/nano-banana-pro/scripts/generate_image.py \
-  --prompt "[THE SELECTED PROMPT]" \
-  --filename "$(date +%Y-%m-%d-%H-%M-%S)-picked.png" \
-  --resolution 1K
+  --prompt "[USER'S EXACT PROMPT]" \
+  --filename "option-1.png" --resolution 1K
+
+uv run ~/.npm-global/lib/node_modules/clawdbot/skills/nano-banana-pro/scripts/generate_image.py \
+  --prompt "[USER'S EXACT PROMPT]" \
+  --filename "option-2.png" --resolution 1K
+
+uv run ~/.npm-global/lib/node_modules/clawdbot/skills/nano-banana-pro/scripts/generate_image.py \
+  --prompt "[USER'S EXACT PROMPT]" \
+  --filename "option-3.png" --resolution 1K
 ```
 
-3. Send the MEDIA: line to deliver the image
+### Step 3: Send All 3 Images Labeled 1, 2, 3
 
-## Example Interaction
+Send each image with just the number:
+
+- **1** [image]
+- **2** [image]
+- **3** [image]
+
+**NO descriptions. NO creativity. Just 1, 2, 3 and the images.**
+
+### Step 4: User Picks or Gives Feedback
+
+- "2" → Done, that's the winner
+- "1 but warmer colors" → Generate 3 MORE with their feedback applied
+- "none, try again" → Generate 3 more with same prompt
+
+**Key: Feedback on any option = 3 new images with that feedback applied**
+
+## Example
 
 **User:** make me an image of a cat wearing a top hat
 
-**You (with buttons):**
-```
-🎨 Here are 3 prompt options:
+**You:** Generate 3 images using that exact prompt, send as 1, 2, 3
 
-**A) Photorealistic**
-A distinguished gray tabby cat wearing a black silk top hat, studio portrait lighting, shallow depth of field, whiskers in sharp focus
+**User:** 2 but bigger hat
 
-**B) Artistic**
-Whimsical watercolor illustration of a fluffy orange cat in an oversized vintage top hat, soft pastel background, storybook charm
+**You:** Generate 3 MORE images with "bigger hat" added to prompt, send as 1, 2, 3
 
-**C) Creative**
-A cat made entirely of clockwork gears and brass, wearing a steampunk top hat with goggles, Victorian laboratory setting
-```
+**User:** 3
 
-**User taps:** 🅱️ Artistic
-
-**You:** Generate that prompt, send image.
+**You:** 👍
 
 ## Rules
 
-1. **Always 3 options** - No more, no less
-2. **Distinct directions** - Each should feel meaningfully different
-3. **Keep prompts concise** - 2-3 sentences max per option
-4. **Use buttons** - Don't make user type "A" or "B"
-5. **Remember context** - When callback arrives, recall the prompts from your message
+1. **Always 3 images** - Same prompt, 3 outputs
+2. **No creativity** - Use user's exact prompt
+3. **Label 1, 2, 3** - No descriptions
+4. **Feedback = 3 more** - Any edit request generates 3 new options
 
 ## API Key
 
