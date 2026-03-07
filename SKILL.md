@@ -12,7 +12,7 @@ triggers:
   - create an image
   - make an image
 metadata:
-  clawdbot:
+  openclaw:
     emoji: "🎨"
     tags:
       - image-generation
@@ -94,4 +94,4 @@ Send each image with just the number:
 
 ## API Key
 
-Uses `GEMINI_API_KEY` from environment or clawdbot config.
+Uses `GEMINI_API_KEY` from environment or openclaw config.
